@@ -7,6 +7,7 @@ from sklearn.cross_validation import cross_val_score as cv_score
 from sklearn import tree 
 from sklearn import neighbors
 from sklearn import preprocessing
+from sklearn import grid_search.GridSearchCV as gscv
 
 def scaleData(dataFrame,flag):
     df = dataFrame.copy()
@@ -28,7 +29,7 @@ def getAbaData(rawAbaData):
 	data = {'Raw Data' : rawAbaData }
 
 	# sepparating the target values and removing them from the dataset
-	data['target'] = rawAbaData['rings']
+	target = rawAbaData['rings']
 	rawAbaData = rawAbaData.drop('rings', axis = 1);
 
 	rawAbaDataCopy = rawAbaData.copy()
@@ -50,46 +51,50 @@ def getAbaData(rawAbaData):
 	data['meanScaledOneHot'] = meanScaledOneHot
 	data['matrixScaledOneHot'] = matrixScaledOneHot
 
-
+	return (data,target)
 	
 def regressAba(data):
 
 	datasetVariants = getAbaData(data)
+	target = datasetVariants[1]
+	datasetVariants = datasetVariants[0]
 
-	exhaustiveCVPipeline = [
-		"OLS" : {
-			"model" : lm.LinearRegression()),
-			"parameters" : {}
+	exhaustiveCVPipeline = {
+		'OLS' : {
+			'model' : lm.LinearRegression(),
+			'parameters' : {}
 		},
-		"Ridge" : {
-			"model" : lm.Ridge()),
-			"parameters" :  {'alpha' : (0,1)}
+		'Ridge' : {
+			'model' : lm.Ridge(),
+			'parameters' :  {'alpha' : numpy.arange(0.05, 1, 0.05)}
 		},
-		"Lasso" : {
-			"model" : lm.Lasso()),
-			"parameters" :  {'alpha' : (0,1)}
+		'Lasso' : {
+			'model' : lm.Lasso(),
+			'parameters' :  {'alpha' : numpy.arange(0.05, 1, 0.05)}
 		},
-		"k-NN" : {
-			"model" : neighbors.KNeighborsRegressor(),
-			"parameters" :  {'weights' : ['uniform','distance'],
-							 'leaf_size' : (5,100),
-							 'n_neighbors' : (0,100)}
+		'k-NN' : {
+			'model' : neighbors.KNeighborsRegressor(),
+			'parameters' :  {'weights' : ['uniform','distance'],
+							 'leaf_size' : numpy.arange(5, 100, 1),
+							 'n_neighbors' : numpy.arange(0, 100, 1)}
 		},
-		"D-Trees" : {
-			"model" : tree.DecisionTreeRegressor()),
-			"parameters" :  {'max_depth ' : (1,None)}
-		}]
+		'D-Trees' : {
+			'model' : tree.DecisionTreeRegressor(),
+			'parameters' :  {'max_depth ' : numpy.arange(5, 100, 1)}
+		}}
 
-	print "Starting Exhausting Regression Search on Abalone Data:\n"
+	print 'Starting Exhausting Regression Search on Abalone Data:\n'
 
-	for description,data in datasetVariants:
-		print "Using dataset: " + description
+	for description,data in datasetVariants.iteritems():
+		print '\nUsing dataset: ' + description + '\n'
 
-		for model,attributes in exhaustiveCVPipeline:
+		for modelName,attributes in exhaustiveCVPipeline.iteritems():
+
+			gscv_instance = gscv(attributes.model, attributes.parameters, cv = 10)
 
 			copy = data.copy()
 
-			scores = cv_score(model_tuple[1],copy,target,cv = 10)
+			scores = gscv_instance.score(copy,target)
 
 			print model, np.mean(scores), np.std(scores)
 
@@ -102,11 +107,11 @@ def classifyDiabetes(data):
 	data = scaleData(data)
 
 	models = [
-		("k-NN", neighbors.KNeighborsClassifier(n_neighbors=5)),
-		("D-Trees", tree.DecisionTreeClassifier()),]
+		('k-NN', neighbors.KNeighborsClassifier(n_neighbors=5)),
+		('D-Trees', tree.DecisionTreeClassifier()),]
 
 
-	print "\nClassification on Diabetes Data:\n"
+	print '\nClassification on Diabetes Data:\n'
 
 	for model_tuple in models:
 		copy = data.copy()
