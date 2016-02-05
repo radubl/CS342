@@ -7,7 +7,7 @@ from sklearn.cross_validation import cross_val_score as cv_score
 from sklearn import tree 
 from sklearn import neighbors
 from sklearn import preprocessing
-from sklearn import grid_search.GridSearchCV as gscv
+from sklearn.grid_search import GridSearchCV as gscv
 
 def scaleData(dataFrame,flag):
     df = dataFrame.copy()
@@ -16,21 +16,26 @@ def scaleData(dataFrame,flag):
         mean = df[var].mean()
         std = df[var].std()
         l1 = (df[var].abs()).sum()
+        l2 =  np.sqrt((df[var]**2).sum())
 
         if(flag == 1):
             df[var] = (df[var]-mean)/std
-        else:
+        elif (flag == 2):
             df[var] = df[var]/l1
+        else :
+        	df[var] = df[var]/l2
 
     return df
 
 def getAbaData(rawAbaData):
 
-	data = {'Raw Data' : rawAbaData }
+	data = {}
 
 	# sepparating the target values and removing them from the dataset
 	target = rawAbaData['rings']
 	rawAbaData = rawAbaData.drop('rings', axis = 1);
+
+	data['Raw Data'] = rawAbaData
 
 	rawAbaDataCopy = rawAbaData.copy()
 
@@ -66,37 +71,37 @@ def regressAba(data):
 		},
 		'Ridge' : {
 			'model' : lm.Ridge(),
-			'parameters' :  {'alpha' : numpy.arange(0.05, 1, 0.05)}
+			'parameters' :  {'alpha' : np.arange(0.05, 1, 0.05)}
 		},
 		'Lasso' : {
 			'model' : lm.Lasso(),
-			'parameters' :  {'alpha' : numpy.arange(0.05, 1, 0.05)}
+			'parameters' :  {'alpha' : np.arange(0.05, 1, 0.05)}
 		},
 		'k-NN' : {
 			'model' : neighbors.KNeighborsRegressor(),
 			'parameters' :  {'weights' : ['uniform','distance'],
-							 'leaf_size' : numpy.arange(5, 100, 1),
-							 'n_neighbors' : numpy.arange(0, 100, 1)}
+							 'leaf_size' : np.arange(5, 100, 1),
+							 'n_neighbors' : np.arange(3, 100, 1)}
 		},
 		'D-Trees' : {
 			'model' : tree.DecisionTreeRegressor(),
-			'parameters' :  {'max_depth ' : numpy.arange(5, 100, 1)}
+			'parameters' :  {'max_depth' : np.arange(5, 100, 1)}
 		}}
 
 	print 'Starting Exhausting Regression Search on Abalone Data:\n'
 
-	for description,data in datasetVariants.iteritems():
+	for description,data in datasetVariants.items():
 		print '\nUsing dataset: ' + description + '\n'
 
-		for modelName,attributes in exhaustiveCVPipeline.iteritems():
+		for modelName,attributes in exhaustiveCVPipeline.items():
 
-			gscv_instance = gscv(attributes.model, attributes.parameters, cv = 10)
+			gscv_instance = gscv(attributes['model'], attributes['parameters'], cv = 10)
 
 			copy = data.copy()
 
-			scores = gscv_instance.score(copy,target)
+			gscv_instance.fit(copy,target)
 
-			print model, np.mean(scores), np.std(scores)
+			print modelName, gscv_instance.best_score_, gscv_instance.best_params_
 
 def classifyDiabetes(data):
 
