@@ -105,7 +105,7 @@ def classifyDiabetes(data):
 	data = data.drop('class', axis = 1);
 
 	data = scaleData(data)
-
+`
 	models = [
 		('k-NN', neighbors.KNeighborsClassifier(n_neighbors=5)),
 		('D-Trees', tree.DecisionTreeClassifier()),]
