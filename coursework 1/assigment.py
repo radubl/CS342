@@ -72,20 +72,20 @@ def regressAba(data):
 		'Ridge' : {
 			'model' : lm.Ridge(),
 			'parameters' :  {'alpha' : np.arange(0.05, 1, 0.05)}
-		},
-		'Lasso' : {
-			'model' : lm.Lasso(),
-			'parameters' :  {'alpha' : np.arange(0.05, 1, 0.05)}
-		},
-		'k-NN' : {
-			'model' : neighbors.KNeighborsRegressor(),
-			'parameters' :  {'weights' : ['uniform','distance'],
-							 'leaf_size' : np.arange(5, 100, 1),
-							 'n_neighbors' : np.arange(3, 100, 1)}
-		},
-		'D-Trees' : {
-			'model' : tree.DecisionTreeRegressor(),
-			'parameters' :  {'max_depth' : np.arange(5, 100, 1)}
+		# },
+		# 'Lasso' : {
+		# 	'model' : lm.Lasso(),
+		# 	'parameters' :  {'alpha' : np.arange(0.05, 1, 0.05)}
+		# },
+		# 'k-NN' : {
+		# 	'model' : neighbors.KNeighborsRegressor(),
+		# 	'parameters' :  {'weights' : ['uniform','distance'],
+		# 					 'leaf_size' : np.arange(5, 100, 1),
+		# 					 'n_neighbors' : np.arange(3, 100, 1)}
+		# },
+		# 'D-Trees' : {
+		# 	'model' : tree.DecisionTreeRegressor(),
+		# 	'parameters' :  {'max_depth' : np.arange(5, 100, 1)}
 		}}
 
 	print 'Starting Exhausting Regression Search on Abalone Data:\n'
@@ -110,7 +110,7 @@ def classifyDiabetes(data):
 	data = data.drop('class', axis = 1);
 
 	data = scaleData(data)
-`
+
 	models = [
 		('k-NN', neighbors.KNeighborsClassifier(n_neighbors=5)),
 		('D-Trees', tree.DecisionTreeClassifier()),]
