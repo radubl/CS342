@@ -30,7 +30,7 @@ def scaleData(dataFrame,flag):
 
 def dealWithMissingValues(data):
 	imputer = Imputer(missing_values=0, strategy="mean", axis=0)
-	return imputer.fit_transform(data)
+	return pd.DataFrame(imputer.fit_transform(data))
 
 def printToFile(results):
 	print ''
@@ -51,9 +51,15 @@ def classifyDiabetes(data):
 
 	data = data.drop(8, axis = 1)
 
-	data = dealWithMissingValues(data)
+	pregnancies = data[0]
 
-	meanVarianceScaled = scaleData(data, 0)
+	reshapedData = data.drop(0, axis = 1)
+
+	reshapedData = dealWithMissingValues(data)
+
+	reshapedData[7] = pregnancies
+
+	meanVarianceScaled = scaleData(reshapedData, 0)
 	l1Scaled = scaleData(data, 1)
 
 	models ={

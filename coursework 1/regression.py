@@ -28,7 +28,7 @@ def scaleData(dataFrame,flag):
 def printToFile(results):
 	with open('./results.txt', 'a')as f1:
 		f1.write('=================== Regression ====================\n')
-		f1.write('timestamp : ' + str(datetime.datetime.now()) + '\n\n\n\n')
+		f1.write('timestamp : ' + str(datetime.datetime.now()) + '\n\n')
 		col_width = max(len(word) for row in results for word in row) + 2
 		for row in results:
 			text = "".join(word.ljust(col_width) for word in row)
